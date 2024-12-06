@@ -24,6 +24,7 @@ from utils import *
 import time, os
 import traceback
 import sys
+from abc import ABC, abstractmethod
 
 #######################
 # Parts worth reading #
@@ -39,6 +40,7 @@ class Agent:
     def __init__(self, index=0):
         self.index = index
 
+    @abstractmethod
     def getAction(self, state):
         """
         The Agent will receive a GameState (from either {pacman, capture, sonar}.py) and

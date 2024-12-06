@@ -1,0 +1,4 @@
+To run pacman interactively with keyboard:
+python3 pacman.py --layout <nameofmap>
+FOr example:
+python3 pacman.py --layout smallClassic
