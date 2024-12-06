@@ -12,7 +12,7 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-from util import manhattanDistance
+from utils import manhattanDistance
 from game import Grid
 import os
 import random
