@@ -54,7 +54,6 @@ import random
 import os
 
 import pacmanAgents  # This imports existing agents
-from pacmanAgents import GreedyFoodAgent  # Add this line if you modified pacmanAgents.py
 
 
 ###################################################
@@ -294,9 +293,7 @@ class ClassicGameRules:
         game = Game(agents, display, self, catchExceptions=catchExceptions)
         game.state = initState
         self.initialState = initState.deepCopy()
-        print(self.initialState.getPacmanPosition())
-        print(self.initialState.getLegalActions())
-        print(self.initialState.isLose())
+        print(type(agents[1]))
         print(self.initialState)
         self.quiet = quiet
         return game
