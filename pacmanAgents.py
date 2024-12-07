@@ -34,7 +34,7 @@ class LeftTurnAgent(game.Agent):
 
 class GreedyAgent(Agent):
     def __init__(self, evalFn="scoreEvaluation"):
-        self.evaluationFunction = util.lookup(evalFn, globals())
+        self.evaluationFunction = utils.lookup(evalFn, globals())
         assert self.evaluationFunction != None
 
     def getAction(self, state):
