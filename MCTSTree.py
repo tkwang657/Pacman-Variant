@@ -4,7 +4,7 @@ import random
 from featureEncoder import FeatureBasedState
 class MCTSNode:
     def __init__(self, state: FeatureBasedState, parent=None):
-        self.state = state         # The game state at this node
+        self.state = state         #Feature based state
         self.parent = parent       # Parent node
         self.children = {}         # Map from actions to child nodes
         self.visits = 0            # Number of times this node has been visited

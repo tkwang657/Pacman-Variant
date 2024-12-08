@@ -40,7 +40,7 @@ class FeatureBasedState():
         return self._raw_game_state.getLegalActions(agentIndex=agentIndex)
     
     def generateSuccessor(self, action="STOP"):
-        return FeatureBasedState(game_state=self._raw_game_state.generatePacmanSuccessor(action=action), features=self._featurelist)
+        return FeatureBasedState(game_state=self._raw_game_state.generatePacmanSuccessor(action=action), features=list(self._features.keys()))
     
     def is_terminal(self):
         if self._raw_game_state.isWin() or self._raw_game_state.isLose():
@@ -75,7 +75,7 @@ class FeatureBasedState():
         finalScore = successorGameScore - (w1 * foodcount) - (w2 * distanceFromClosestFood) 
         return finalScore
 
-
+    #######
     #Calculate Features
     def _Weighted_Food_Distances(self):
         # Array of (x, y) positions where food is located
@@ -88,7 +88,8 @@ class FeatureBasedState():
         return x_center, y_center
 
     def _Food_In_Three_Blocks(self):
-        
+        pass
+
     def _nearest_pellet(self):
         #Nearest food pellet by manhattan distance, if multiple, return multiple
         food_pos=np.argwhere(self._food_grid)
@@ -113,7 +114,8 @@ class FeatureBasedState():
         manhattan = np.abs(cpx-next_pos[0])+np.abs(cpy-next_pos[1])
         return manhattan<=2
 #Notes: Ghosts are index 1
-
+    
+    ######
     #Helper functions
     def _get_feature(self, feature_name: str):
         method=getattr(self, f"_{feature_name}")
