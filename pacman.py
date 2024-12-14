@@ -265,6 +265,7 @@ class GameState:
         """
         self.data.initialize(layout, numGhostAgents)
 
+
 ############################################################################
 #                     THE HIDDEN SECRETS OF PACMAN                         #
 #                                                                          #
@@ -293,7 +294,7 @@ class ClassicGameRules:
         game = Game(agents, display, self, catchExceptions=catchExceptions)
         game.state = initState
         self.initialState = initState.deepCopy()
-        print(self.initialState)
+        # print(self.initialState)
         self.quiet = quiet
         return game
 
@@ -534,7 +535,7 @@ def readCommand(argv):
                       help='Generate minimal output and no graphics', default=False)
     parser.add_option('-g', '--ghosts', dest='ghost',
                       help=default('the ghost agent TYPE in the ghostAgents module to use'),
-                      metavar = 'TYPE', default='RandomGhost')
+                      metavar = 'TYPE', default='DirectionalGhost')
     parser.add_option('-k', '--numghosts', type='int', dest='numGhosts',
                       help=default('The maximum number of ghosts to use'), default=4)
     parser.add_option('-z', '--zoom', type='float', dest='zoom',
@@ -550,7 +551,7 @@ def readCommand(argv):
     parser.add_option('-x', '--numTraining', dest='numTraining', type='int',
                       help=default('How many episodes are training (suppresses output)'), default=0)
     parser.add_option('--frameTime', dest='frameTime', type='float',
-                      help=default('Time to delay between frames; <0 means keyboard'), default=0.5)
+                      help=default('Time to delay between frames; <0 means keyboard'), default=0.1)
     parser.add_option('-c', '--catchExceptions', action='store_true', dest='catchExceptions',
                       help='Turns on exception handling and timeouts during games', default=False)
     parser.add_option('--timeout', dest='timeout', type='int',
@@ -664,7 +665,6 @@ def readCommand(argv):
 
     return args
 
-
 def loadAgent(pacman, nographics):
     # Looks through all pythonPath Directories for the right module,
     pythonPathStr = os.path.expandvars("$PYTHONPATH")
@@ -759,7 +759,6 @@ def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0, c
             [['Loss', 'Win'][int(w)] for w in wins]))
 
     return games
-
 
 if __name__ == '__main__':
     """

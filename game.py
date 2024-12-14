@@ -688,8 +688,8 @@ class Game:
                     return
             else:
                 action = agent.getAction(observation)
-                print(action)
-                print(self.state.getNumFood())
+                # print(action)
+                # print(self.state.getNumFood())
             self.unmute()
 
             # Execute the action
@@ -734,3 +734,4 @@ class Game:
                     self.unmute()
                     return
         self.display.finish()
+

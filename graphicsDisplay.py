@@ -156,7 +156,7 @@ class PacmanGraphics:
     def __init__(self, zoom=1.0, frameTime=0.0, capture=False):
         self.have_window = 0
         self.currentGhostImages = {}
-        self.pacmanImage = None
+        self.pacmanImage = [] # THOMAS CHANGE
         self.zoom = zoom
         self.gridSize = DEFAULT_GRID_SIZE * zoom
         self.capture = capture
@@ -170,12 +170,13 @@ class PacmanGraphics:
         self.startGraphics(state)
 
         # self.drawDistributions(state)
-        self.distributionImages = None  # Initialized lazily
+        self.pacmanImage = [None] * len(state.agentStates)  # THOMAS CHANGE
         self.drawStaticObjects(state)
         self.drawAgentObjects(state)
 
         # Information
         self.previousState = state
+
 
     def startGraphics(self, state):
         self.layout = state.layout
@@ -210,10 +211,12 @@ class PacmanGraphics:
 
     def drawAgentObjects(self, state):
         self.agentImages = [] # (agentState, image)
+        self.pacmanImage = []  # Reset pacmanImage to avoid indexing errors - THOMAS ADDITION
         for index, agent in enumerate(state.agentStates):
             if agent.isPacman:
                 image = self.drawPacman(agent, index)
-                self.agentImages.append( (agent, image) )
+                self.agentImages.append( (agent, image) ) 
+                self.pacmanImage.append(image)
             else:
                 image = self.drawGhost(agent, index)
                 self.agentImages.append( (agent, image) )
@@ -233,7 +236,7 @@ class PacmanGraphics:
             self.agentImages[agentIndex] = (newState, image )
         refresh()
 
-    def update(self, newState):
+    def update(self, newState, pacman_positions=None, previousState=None):
         agentIndex = newState._agentMoved
         agentState = newState.agentStates[agentIndex]
 
@@ -252,6 +255,39 @@ class PacmanGraphics:
         self.infoPane.updateScore(newState.score)
         if 'ghostDistances' in dir(newState):
             self.infoPane.updateGhostDistances(newState.ghostDistances)
+        # Remove old Pacman visuals
+        # for i, pacmanImage in enumerate(self.pacmanImage):
+        #     if pacmanImage:
+        #         for item in pacmanImage:
+        #             remove_from_screen(item)
+        #         self.pacmanImage[i] = None
+
+        # # Update Pacman and ghost positions
+        # for i, agentState in enumerate(newState.agentStates):
+        #     if agentState.isPacman:
+        #         # Initialize Pacman image if it's None
+        #         if self.pacmanImage[i] is None:
+        #             self.pacmanImage[i] = self.drawPacman(agentState, i)
+
+        #         # Skip animation if the image is missing
+        #         if self.pacmanImage[i] is None:
+        #             continue
+
+        #         self.animatePacman(agentState, self.previousState.agentStates[i], self.pacmanImage[i])
+        #     else:
+        #         prevState, prevImage = self.agentImages[i]
+        #         self.moveGhost(agentState, i, prevState, prevImage)
+        #         self.agentImages[i] = (agentState, prevImage)
+
+        # # Handle other updates (food, capsules, etc.)
+        # if newState._foodEaten is not None:
+        #     self.removeFood(newState._foodEaten, self.food)
+        # if newState._capsuleEaten is not None:
+        #     self.removeCapsule(newState._capsuleEaten, self.capsules)
+        # self.infoPane.updateScore(newState.score)
+
+        refresh()
+
 
     def make_window(self, width, height):
         grid_width = (width-1) * self.gridSize
@@ -307,6 +343,24 @@ class PacmanGraphics:
         refresh()
 
     def animatePacman(self, pacman, prevPacman, image):
+        # if self.frameTime < 0:
+        #     print('Press any key to step forward, "q" to play')
+        #     keys = wait_for_keys()
+        #     if 'q' in keys:
+        #         self.frameTime = 0.1
+        # if self.frameTime > 0.01 or self.frameTime < 0:
+        #     start = time.time()
+        #     fx, fy = self.getPosition(prevPacman)
+        #     px, py = self.getPosition(pacman)
+        #     frames = 4.0
+        #     for i in range(1,int(frames) + 1):
+        #         pos = px*i/frames + fx*(frames-i)/frames, py*i/frames + fy*(frames-i)/frames
+        #         self.movePacman(pos, self.getDirection(pacman), image)
+        #         refresh()
+        #         sleep(abs(self.frameTime) / frames)
+        # else:
+        #     self.movePacman(self.getPosition(pacman), self.getDirection(pacman), image)
+        # refresh()
         if self.frameTime < 0:
             print('Press any key to step forward, "q" to play')
             keys = wait_for_keys()
@@ -317,8 +371,8 @@ class PacmanGraphics:
             fx, fy = self.getPosition(prevPacman)
             px, py = self.getPosition(pacman)
             frames = 4.0
-            for i in range(1,int(frames) + 1):
-                pos = px*i/frames + fx*(frames-i)/frames, py*i/frames + fy*(frames-i)/frames
+            for i in range(1, int(frames) + 1):
+                pos = px * i / frames + fx * (frames - i) / frames, py * i / frames + fy * (frames - i) / frames
                 self.movePacman(pos, self.getDirection(pacman), image)
                 refresh()
                 sleep(abs(self.frameTime) / frames)
@@ -540,6 +594,23 @@ class PacmanGraphics:
                 else:
                     imageRow.append(None)
         return foodImages
+    
+    #THOMAS FUNCTION
+    def drawPacmanOverlay(self, pacman_positions):
+        self.clearExpandedCells()  # Clear old overlays
+
+        for position in pacman_positions:
+            if position:  # Ensure the position is valid
+                screen_point = self.to_screen(position)
+                circle(
+                    screen_point,
+                    PACMAN_SCALE * self.gridSize,
+                    fillColor="yellow",
+                    outlineColor="yellow",
+                    width=1,
+                )
+
+
 
     def drawCapsules(self, capsules ):
         capsuleImages = {}
