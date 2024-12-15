@@ -2,7 +2,7 @@ import neat
 import pickle
 import layout
 from pacman import ClassicGameRules
-from ghostAgents import RandomGhost
+from ghostAgents import RandomGhost, DirectionalGhost
 from graphicsDisplay import PacmanGraphics
 from utils import manhattanDistance
 import time
