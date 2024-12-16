@@ -1,7 +1,7 @@
 from game import Agent
 from math import sqrt, log
 from MCTSTree import MCTSNode
-from featureEncoder import FeatureBasedState
+from featureState import FeatureBasedState
 #Actions: North East West South Stop
 class MCTSAgent(Agent):
     
