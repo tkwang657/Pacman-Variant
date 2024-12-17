@@ -16,7 +16,7 @@ Example:
 python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20 --maxDuration 5 -a timelimit=0.05
 will run the game for either 6 minutes or 20 games and output stats whichever is hit first, where our MCTS agent has 0.05 seconds per move.
 
-**Neural Network Agent**
+# Neural Network Agent
 To train the Neural Network, run:
 `python3 neuralNetworkAgent.py`
 This will train the NN for whatever number of generations specified by the code (right now n=100), but if you switch the else statement of the __main__ function
