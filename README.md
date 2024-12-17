@@ -2,7 +2,7 @@ Make sure the packages in requirements.txt are installed before running
 
 To run pacman interactively with keyboard:
 python3 pacman.py --layout <nameofmap>
-FOr example:
+For example:
 python3 pacman.py --layout smallClassic
 
 **MCTS Agent** (Alex Kwang)
@@ -23,8 +23,9 @@ To train the Neural Network, run:
 This will train the NN for whatever number of generations specified by the code (right now n=100), but if you switch the else statement of the __main__ function
 with what is commented out, it will run for a certain amount of time (default = 4 hours).
 
-To run the best Neural Network you have saved (a default is already loaded in in winner.pkl), run
+To run the best Neural Network you have saved (a default is already loaded in in winner.pkl) once, run
 `python3 neuralNetworkAgent.py -best`
 
-To test the Neural Network agent and return the mean & variance over a disclosed amount of time (right now 4 hours), run
-`python3 neuralNetworkAgent.py -test`
+To test the Neural Network agent and return the mean & variance over a disclosed amount of time (right now 30 seconds), run
+`python3 neuralNetworkAgent.py -test` --> results will print out in 30 seconds
+
