@@ -19,9 +19,9 @@ python3 pacman.py --layout <nameofmap> -p MCTSAgent -g <GhostType> --quietTextGr
 4. the --quietTextGraphics flag is passed in to avoid any graphics (The Zoo does not support tkinter so run with quietTextGraphics)
 5. If both maxDuration and numgames are passed in, the code will terminate whichever limit is hit first. maxDuration is amount of time in minutes.
 5. -a passes in a time limit in seconds for the MCTS Agent for each action. The default is 0.05 seconds
-Example: 
-python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20 --maxDuration 5 -a timelimit=0.05
-will run the game for either 6 minutes or 20 games and output stats whichever is hit first, where our MCTS agent has 0.05 seconds per move.
+Example to run for 6 mins: 
+python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20 --maxDuration 5 -a timelimit=0.08
+will run the game for either 6 minutes or 20 games and output stats whichever is hit first, where our MCTS agent has 0.08 seconds per move.
 
 Results Analysis:
 Games were tested on the mediumClassic Map, smallClassic Map using numGames=20000 games and maxDuration=240 minutes for both maps. Agents were given a 0.05 seconds timelimit. So to replicate results, you should run the following two commands:
@@ -32,6 +32,7 @@ Small Classic:
 
 Medium Classic
 
+Please note the above results were conducted on my personal computer and might have slightly different results when run on the zoo due to differences in computational power as this is a Monte-Carlo process gated by time. Finally there's also elements of noise added to ensure a good exploration exploitation balance.
 
 
 **Neural Network Agent** (Thomas Chung)\
