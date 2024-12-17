@@ -9,7 +9,7 @@ To test the MCTS Agent, run:
 python3 pacman.py --layout <nameofmap> -p MCTSAgent -g <GhostType> --quietTextGraphics --numGames <numGames> --maxDuration <maxDuration> -a timelimit=timelimit
 1. layout: bigClassic, mediumClassic, smallClassic, smallClassicLittleFood
 2. GhostType: RandomGhost or DirectionalGhost (Note the DirectionalGhost is a greedyghost that chases Pacman)
-4. the --quietTextGraphics flag is passed in to avoid any graphics
+4. the --quietTextGraphics flag is passed in to avoid any graphics (The Zoo does not support tkinter so run with quietTextGraphics)
 5. If both maxDuration and numgames are passed in, the code will terminate whichever limit is hit first. maxDuration is amount of time in minutes.
 5. -a passes in a time limit in seconds for the MCTS Agent for each action. The default is 0.05 seconds
 Example: 
