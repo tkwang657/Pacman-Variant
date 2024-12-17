@@ -11,7 +11,7 @@ python3 pacman.py --layout <nameofmap> -p MCTSAgent -g <GhostType> --quietTextGr
 2. GhostType: RandomGhost or DirectionalGhost (Note the DirectionalGhost is a greedyghost that chases Pacman)
 4. the --quietTextGraphics flag is passed in to avoid any graphics
 5. If both maxDuration and numgames are passed in, the code will terminate whichever limit is hit first. maxDuration is amount of time in minutes.
-5. -a passes in a time limit in seconds for the MCTS Agent for each action. The default is 0.35 seconds
+5. -a passes in a time limit in seconds for the MCTS Agent for each action. The default is 0.05 seconds
 Example: 
-python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 10 --maxDuration 4 -a timelimit=0.2
-will run the game for either 4 minutes or 10 games and output stats whichever is hit first, where our MCTS agent has 0.2 seconds per move.
+python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20 --maxDuration 5 -a timelimit=0.05
+will run the game for either 6 minutes or 20 games and output stats whichever is hit first, where our MCTS agent has 0.05 seconds per move.

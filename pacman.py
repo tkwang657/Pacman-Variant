@@ -722,7 +722,7 @@ def runGames(layout, pacman, ghosts, display, numGames, record, maxDuration, num
     end_time=None
     if maxDuration:
         end_time=time.process_time()+maxDuration*60
-    print(time.process_time(), end_time)
+    #print(time.process_time(), end_time)
     for i in range(numGames):
         if end_time is not None and time.process_time()>=end_time:
             break
