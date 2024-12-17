@@ -36,13 +36,13 @@ To test the Neural Network agent and return the mean & variance over a disclosed
 For the Neural Network, the agent trained for 6 hours and ran through 2242 generations. The factors used were distance to the nearest (only) ghost, the distance 
 to the nearest food pellet, and the local pellet density in a 5 tile radius (manhattan distance). We then tested the agent for 4 hours on both Greedy and Random agents.\
 Greedy Agent:\
-  Total Games Played: 2876636\
-  Mean Score: -223.586781574033\
-  Variance: 1725.755372139545\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Games Played: 2876636\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mean Score: -223.586781574033\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Variance: 1725.755372139545\
 Random Agent:\
-  Total Games Played: 143316\
-  Mean Score: -210.09742108347984\
-  Variance: 10467.106219215242\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Games Played: 143316\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mean Score: -210.09742108347984\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Variance: 10467.106219215242\
 
 **Discussion**
 For the Neural Network agent, we had three features, and they were initially:
