@@ -5,6 +5,10 @@ python3 pacman.py --layout <nameofmap>
 For example:
 python3 pacman.py --layout smallClassic
 
+**Description of Game**
+Welcome to Pacman! The goal of the game is to have the yellow Pac-man eat all of the pellets before any of the ghosts touch you! For simplicity, we have removed
+fruit, all but one ghost, and created a smaller custom board to run the game on.
+
 **MCTS Agent** (Alex Kwang)
 To test the MCTS Agent, run:
 python3 pacman.py --layout <nameofmap> -p MCTSAgent -g <GhostType> --quietTextGraphics --numGames <numGames> --maxDuration <maxDuration> -a timelimit=timelimit
