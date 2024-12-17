@@ -1,9 +1,9 @@
 Make sure the packages in requirements.txt are installed before running
 
 To run pacman interactively with keyboard:
-python3 pacman.py --layout <nameofmap>
+`python3 pacman.py --layout <nameofmap>`
 For example:
-python3 pacman.py --layout smallClassic
+`python3 pacman.py --layout smallClassic`
 
 **Description of Game**
 Welcome to Pacman! The goal of the game is to have the yellow Pac-man eat all of the pellets before any of the ghosts touch you! For simplicity, we have removed
