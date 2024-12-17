@@ -68,11 +68,12 @@ class MCTSAgent(Agent):
     Returns a function that takes a position (an instance of State) and returns the best move
     after running MCTS for the specified time limit.
     """
-    def __init__(self, index=0):
+    def __init__(self, index=0, timelimit=0.05):
         super().__init__(index)
         self._distancer=None
         self._edgeFactory=EdgeFactory()
         self._features=("direction_to_nearest_pellet", "Is_Ghost_Near_Me")
+        self._timelimit=float(timelimit)
     
     def registerInitialState(self, gamestate): # inspects the starting state
         self._distancer=Distancer(layout=gamestate.data.layout)
@@ -87,7 +88,8 @@ class MCTSAgent(Agent):
         #print(action)
         return action
     
-
+    def reset(self):
+        self._edgeFactory=EdgeFactory()
 
     
 

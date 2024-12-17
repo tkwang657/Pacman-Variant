@@ -1,0 +1,2 @@
+neat_python==0.92
+numpy==2.2.0

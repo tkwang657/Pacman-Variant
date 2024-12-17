@@ -48,3 +48,5 @@ class GreedyAgent(Agent):
         bestActions = [pair[1] for pair in scored if pair[0] == bestScore]
         return random.choice(bestActions)
 
+def scoreEvaluation(state):
+    return state.getScore()
