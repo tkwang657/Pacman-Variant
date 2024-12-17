@@ -354,7 +354,7 @@ if __name__ == "__main__":
 
             elif args.test:
                 # Test the winner for 4 hours
-                test_winner(winner, config, time_limit=2*60*60, visualize=False)
+                test_winner(winner, config, time_limit=30, visualize=False)
 
         except FileNotFoundError:
             print("Error: 'winner.pkl' not found. Train a model first to save the best genome.")
