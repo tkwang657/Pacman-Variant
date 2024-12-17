@@ -6,6 +6,7 @@ from ghostAgents import RandomGhost, DirectionalGhost
 from graphicsDisplay import PacmanGraphics
 from utils import manhattanDistance
 import time
+import random
 
 class NEATPacmanAgent:
     """
@@ -55,6 +56,12 @@ class NEATPacmanAgent:
         if not legal_actions:
             return "North"  # Default to "North" if no legal actions are available
 
+        # Randomization: Introduce a small probability of choosing a random action
+        # Add epsilon randomness if more than 2 legal actions
+        epsilon = 0.1  # Adjust this value to control randomness
+        if len(legal_actions) > 2 and random.random() < epsilon:
+            return random.choice(legal_actions)
+
         # Get Pacman's current position
         current_position = state.getPacmanPosition()
 
@@ -95,15 +102,36 @@ class NEATPacmanAgent:
         pacman_pos = state.getPacmanPosition()
         ghost_pos = state.getGhostPositions()
         food_positions = state.getFood().asList()
+
+        # Nearest ghost distance
         nearest_ghost_distance = min(manhattanDistance(pacman_pos, ghost) for ghost in ghost_pos)
+        # Nearest food distance
         nearest_food_distance = min(manhattanDistance(pacman_pos, food) for food in food_positions)
-        pellet_density = len(food_positions) / (state.getWalls().width * state.getWalls().height)
+
+        # Compute local pellet density:
+        # Define a search radius. Increase or decrease this as needed.
+        radius = 5  
+        local_pellet_count = 0
+
+        for food in food_positions:
+            if manhattanDistance(pacman_pos, food) <= radius:
+                local_pellet_count += 1
+
+        # Normalize local density
+        # One simple normalization: divide by the maximum possible number of tiles in the radius.
+        # For a radius r, a rough upper bound on tiles within r steps (in a Manhattan sense) could be:
+        # number_of_tiles = sum of (1 + 2*i) for i=0 to r, which approximates the diamond shape of a Manhattan circle.
+        # For simplicity, you could just assume a square: (2*radius+1)^2.
+        # Or just keep it as a raw count if you prefer. Experiment to find what works best.
+        max_possible_tiles = (2 * radius + 1) ** 2
+        local_density = local_pellet_count / float(max_possible_tiles)
 
         return [
-            nearest_ghost_distance / 100.0,  # Normalize inputs
+            nearest_ghost_distance / 100.0,  # normalize distances as before
             nearest_food_distance / 100.0,
-            pellet_density,
+            local_density  # local density instead of global pellet density
         ]
+
 
 # def run_game(agent, visualize=True):
 #     layout_name = 'smallClassic'
@@ -215,8 +243,10 @@ def eval_genomes(genomes, config):
 
 def run_winner(winner_genome, config, layout_name='smallClassic', visualize=True):
     """
-    Runs a game using the winner genome from NEAT training.
+    Runs a game using the winner genome from NEAT training with DirectionalGhosts.
     """
+    from ghostAgents import DirectionalGhost  # Import the DirectionalGhost class
+
     # Create a NEAT-controlled Pacman agent
     winner_agent = NEATPacmanAgent(winner_genome, config)
 
@@ -227,7 +257,11 @@ def run_winner(winner_genome, config, layout_name='smallClassic', visualize=True
 
     # Set up the game
     rules = ClassicGameRules(timeout=30)
-    ghost_agents = [RandomGhost(1)]  # Add a ghost to interact with Pacman
+
+    # Use DirectionalGhost as the ghost agent
+    ghost_agents = [DirectionalGhost(i + 1) for i in range(game_layout.getNumGhosts())]
+
+    # Set up the display
     display = PacmanGraphics(zoom=1.0, frameTime=0.1) if visualize else None
 
     # Create and run the game
@@ -237,15 +271,88 @@ def run_winner(winner_genome, config, layout_name='smallClassic', visualize=True
     # Return the final score
     return game.state.getScore()
 
+# def run_winner(winner_genome, config, layout_name='smallClassic', visualize=True):
+#     """
+#     Runs a game using the winner genome from NEAT training.
+#     """
+#     # Create a NEAT-controlled Pacman agent
+#     winner_agent = NEATPacmanAgent(winner_genome, config)
+
+#     # Load the layout
+#     game_layout = layout.getLayout(layout_name)
+#     if game_layout is None:
+#         raise FileNotFoundError(f"The layout '{layout_name}' could not be found.")
+
+#     # Set up the game
+#     rules = ClassicGameRules(timeout=30)
+#     ghost_agents = [RandomGhost(1)]  # Add a ghost to interact with Pacman
+#     display = PacmanGraphics(zoom=1.0, frameTime=0.1) if visualize else None
+
+#     # Create and run the game
+#     game = rules.newGame(game_layout, winner_agent, ghost_agents, display, quiet=not visualize)
+#     game.run()
+
+#     # Return the final score
+#     return game.state.getScore()
+
+import statistics  # For calculating variance
+import textDisplay
+
+def test_winner(winner_genome, config, layout_name='smallClassic', time_limit=4*60*60, visualize=False):
+    """
+    Tests the best genome for a specified time limit, tracking mean and variance of scores.
+    """
+    from ghostAgents import DirectionalGhost  # Use DirectionalGhost for testing
+
+    # Create a NEAT-controlled Pacman agent
+    winner_agent = NEATPacmanAgent(winner_genome, config)
+
+    # Load the layout
+    game_layout = layout.getLayout(layout_name)
+    if game_layout is None:
+        raise FileNotFoundError(f"The layout '{layout_name}' could not be found.")
+
+    # Set up the game
+    rules = ClassicGameRules(timeout=30)
+    ghost_agents = [DirectionalGhost(i + 1) for i in range(game_layout.getNumGhosts())]
+
+    # Use NullGraphics if visualize is False
+    display = PacmanGraphics(zoom=1.0, frameTime=0.1) if visualize else textDisplay.NullGraphics()
+
+    # Track scores
+    scores = []
+    start_time = time.time()
+
+    while time.time() - start_time < time_limit:
+        # Run a game
+        game = rules.newGame(game_layout, winner_agent, ghost_agents, display, quiet=not visualize)
+        game.run()
+        scores.append(game.state.getScore())
+
+    # Calculate mean and variance
+    mean_score = sum(scores) / len(scores)
+    variance = statistics.variance(scores) if len(scores) > 1 else 0
+
+    print(f"\nTesting Results:")
+    print(f"Total Games Played: {len(scores)}")
+    print(f"Mean Score: {mean_score}")
+    print(f"Variance: {variance}")
+
+    return mean_score, variance
+
+
+
 import argparse  # Add this import for command-line argument parsing
+
 
 if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Run NEAT Pacman agent.")
     parser.add_argument("-best", action="store_true", help="Run the saved best genome from 'winner.pkl'")
+    parser.add_argument("-test", action="store_true", help="Test the saved best genome for 4 hours")
     args = parser.parse_args()
 
-    if args.best:
+    if args.best or args.test:
         # Run the best genome saved in winner.pkl
         try:
             with open("winner.pkl", "rb") as f:
@@ -259,9 +366,15 @@ if __name__ == "__main__":
                 neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path
             )
 
-            # Run the game with the loaded winner
-            final_score = run_winner(winner, config, visualize=True)
-            print(f"Winner's final score: {final_score}")
+            if args.best:
+                # Run the game with the loaded winner
+                final_score = run_winner(winner, config, visualize=True)
+                print(f"Winner's final score: {final_score}")
+
+            elif args.test:
+                # Test the winner for 4 hours
+                test_winner(winner, config, time_limit=4*60*60, visualize=False)
+
         except FileNotFoundError:
             print("Error: 'winner.pkl' not found. Train a model first to save the best genome.")
     else:
@@ -281,7 +394,7 @@ if __name__ == "__main__":
         population.add_reporter(stats)
 
         # Run NEAT for 100 generations
-        winner = population.run(eval_genomes, n=5)
+        winner = population.run(eval_genomes, n=100)
 
         # Save the best genome
         with open("winner.pkl", "wb") as f:
@@ -292,3 +405,39 @@ if __name__ == "__main__":
         # Run the game with the winner
         final_score = run_winner(winner, config, visualize=True)
         print(f"Winner's final score: {final_score}")
+        # Load NEAT configuration
+        # config_path = "neat-config.ini"  # Path to the config file
+        # config = neat.Config(
+        #     neat.DefaultGenome, neat.DefaultReproduction,
+        #     neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path
+        # )
+
+        # # Create the NEAT population
+        # population = neat.Population(config)
+
+        # # Add reporters to show progress in the console
+        # population.add_reporter(neat.StdOutReporter(True))
+        # stats = neat.StatisticsReporter()
+        # population.add_reporter(stats)
+
+        # # Time-based training logic
+        # time_limit = 6 * 60 * 60  # 6 hours in seconds
+        # start_time = time.time()
+        # best_genome = None
+
+        # # Run NEAT until the time limit is reached
+        # generation = 0
+        # while time.time() - start_time < time_limit:
+        #     generation += 1
+        #     print(f"Starting generation {generation}...")
+        #     best_genome = population.run(eval_genomes, n=1)  # Run one generation at a time
+
+        # # Save the best genome after training ends
+        # with open("winner.pkl", "wb") as f:
+        #     pickle.dump(best_genome, f)
+
+        # print("\nBest genome:\n", best_genome)
+
+        # # Run the game with the winner
+        # final_score = run_winner(best_genome, config, visualize=True)
+        # print(f"Winner's final score: {final_score}")
