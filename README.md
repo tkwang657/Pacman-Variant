@@ -23,7 +23,14 @@ Example:
 python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20 --maxDuration 5 -a timelimit=0.05
 will run the game for either 6 minutes or 20 games and output stats whichever is hit first, where our MCTS agent has 0.05 seconds per move.
 
-Results Analysis
+Results Analysis:
+Games were tested on the mediumClassic Map, smallClassic Map using numGames=20000 games and maxDuration=240 minutes for both maps. Agents were given a 0.05 seconds timelimit. So to replicate results, you should run the following two commands:
+    python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20000 --maxDuration 240 -a timelimit=0.05
+    python3 pacman.py --layout mediumClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20000 --maxDuration 240 -a timelimit=0.05
+The statistics were as follows:
+Small Classic:
+
+Medium Classic
 
 
 
