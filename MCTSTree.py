@@ -4,98 +4,28 @@ import random
 from featureState import FeatureBasedState
 from pacman import GameState
 import numpy as np
-class NodeFactory:
+from distanceCalculator import Distancer
+import sys
+class EdgeFactory:
     def __init__(self):
-        self._features=None
         self._visited={}
-    def setFeatures(self, features):
-        if self._features is None:
-            self._features=features
+    def CreateEdge(self, feature_tuple, action):
+        key=(feature_tuple, action)
+        if key in self._visited:
+            return self._visited[key]
         else:
-            raise Exception("Set Features called on factory already with objects")
-    def CreateNode(self, gamestate, reward_function: str="WeightedScoringWithFoodCount"):
-        if self._features is None:
-            raise Exception("Cannot create Feature Based State without specifying features")
-        extractedFeaturesTuple=self._extractFeatures(gamestate)
-        if extractedFeaturesTuple in self._visited:
-            return self._visited[extractedFeaturesTuple]
-        else:
-            newState=FeatureBasedState(game_state=gamestate, reward_function=reward_function, features=extractedFeaturesTuple)
-            newNode=MCTSNode(state=newState, factory=self)
-            self._visited[extractedFeaturesTuple]=newNode
-            return newNode
-
-    def CountNodes(self):
-        return len(self._visited)
+            new_edge=MCTSEdge(parent=feature_tuple, action=action)
+            self._visited[key]=new_edge
+            return new_edge
     
-
-
-    #######
-    #Calculate Features
-    def _extractFeatures(self, gamestate: GameState):
-        ghost_x, ghost_y=gamestate.getGhostPosition(agentIndex=1)
-        food_grid=np.array(gamestate.getFood().data, type=bool)
-        cur_x, cur_y=gamestate.getPacmanPosition()
-        data={"ghost_x": ghost_x,
-              "ghost_y": ghost_y,
-              "food_grid": food_grid, 
-              "cur_x": cur_x, 
-              "cur_y": cur_y, 
-              "gamestate": gamestate}
-        featureTuple=[]
-        for feature in self._features:
-            func_ptr=self._get_feature(feature_name=feature)
-            featureTuple.append((feature, func_ptr(data=data)))
-        return tuple(featureTuple)
-
-
-    def _Weighted_Food_Distances(self, data: dict):
-        # Array of (x, y) positions where food is located
-        food_pos=np.argwhere(data["food_grid"])
-        assert data["gamestate"].getNumFood()==len(food_pos)
-        #Calculate center of food
-        x_center=np.mean(food_pos[:, 0]-data["cur_x"])
-        y_center=np.mean(food_pos[:,1]-data["cur_y"])
-        #average_manhattan_distance
-        return x_center, y_center
-
-    def _Food_In_Three_Blocks(self, data: dict):
-        pass
-
-    def _nearest_pellet(self, data: dict):
-        #Nearest food pellet by manhattan distance, if multiple, return multiple
-        food_pos=np.argwhere(data["food_grid"])
-        distances = np.abs(food_pos[:, 0] - data["cur_x"]) + np.abs(food_pos[:, 1] - data["cur_y"])
-        min_distance = np.min(distances)
-        nearest_pellets = food_pos[distances == min_distance]
-        return nearest_pellets
-        
-    def _Is_Ghost_In_One_Block(self, data: dict):
-        # Check if ghost is in a 2 block radius by manhattan distance
-        manhattan = np.abs(data["cur_x"]-data["ghost_x"])+np.abs(data["cur_y"]-data["ghost_y"])
-        return manhattan<=1
-    
-    def _Is_Ghost_In_Two_Blocks(self, data: dict):
-        #IDS search_algorithm
-        pass
-
-#Notes: Ghosts are index 1
-        ######
-    #Helper functions
-    def _get_feature(self, feature_name: str):
-        method=getattr(self, f"_{feature_name}")
-        if method:
-            return method
-        else:
-            raise ValueError(f"Feature '{feature_name}' not found.")
 
 
 class MCTSEdge:
-    def __init__(self, parent, child, action):
+    def __init__(self, parent: tuple, action):
+        """Pass in the feature tuple as the parent"""
         self.parent=parent
         self.visits=0
         self.totalreward=0
-        self.child=child
         self.action=action
     
     @property
@@ -109,33 +39,33 @@ class MCTSEdge:
         self.visits+=1
         self.totalreward+=reward
 class MCTSNode:
-    legal_actions=['North', 'East', 'South', 'West', 'Stop']
-    def __init__(self, state: FeatureBasedState, factory: NodeFactory):
-        self.state = state         #Feature based state
-        self.edges = {}         # Map from actions to Edge object
-        self.TotalVisits=0
-        self._factory=factory
-
-
-    def is_fully_expanded(self):
-        """Returns True if all children have been expanded."""
-        return len(self.edges) == 5
-
-    def is_terminal(self):
-        return self.state.is_terminal()
+    def __init__(self, state: FeatureBasedState, edgefactory: EdgeFactory):
+        self.state = state         #Feature based game statestate
+        self._edgefactory=edgefactory
+        self.actions={}
     
-    def selection(self): #Tree Policy is UCB
-        """Returns the action with the highest UCB1 value to traverse, assuming that root node is fully expanded."""
-        return max(self.edges.keys(), key=lambda action: self.compute_UCB(edge=self.edges[action]))
+    def selection(self, epsilon=0.5): #Tree Policy is UCB
+        ###
+        # u=random.random()
+        # if u<=exploitation and not self.state.features["Is_Ghost_Near_Me"]:
+        #     return
 
-    def compute_UCB(self, edge: MCTSEdge, exploration_weight=sqrt(2)):
-        if edge.q_value== float("inf"):
+        """Returns the action with the highest UCB1 value to traverse, assuming that root node is fully expanded."""
+        return max(self.state.getLegalActions(), key=lambda action: self.compute_UCB(action=action))
+
+    def is_Fully_Expanded(self):
+        return len(self.actions)==len(self.state.getLegalActions())
+
+    def compute_UCB(self, action, exploration_weight=sqrt(1.5)):
+        edge=self.action_to_edge(action=action)
+        if edge.q_value== float("inf") or edge.visits==0:
             return float("inf")
         else:
             rtn= edge.q_value + exploration_weight*sqrt(log(self.TotalVisits)/edge.visits)
             return rtn
+
     def payoff(self):
-        if not self.is_terminal():
+        if not self.state.is_terminal():
             raise Exception("Payoff called on non-terminal node")
         else:
             return self.state.payoff
@@ -144,14 +74,16 @@ class MCTSNode:
         """
         Returns: action
         Expands by adding a random new edge for an unvisited action. Assumes that the current node is expandable."""
-        untried_actions = [action for action in MCTSNode.legal_actions if action not in self.edges]
+        untried_actions = [action for action in self.state.getLegalActions() if action not in self.actions.keys()]
         action = random.choice(untried_actions)
-        raw_successor_state = self.state.generateSuccessor(action)
-        child_node = self._factory.CreateNode(gamestate=raw_successor_state, parent=self)
-        self.edges[action] = MCTSEdge(parent=self, child=child_node, action=action)
+        new_state=self.state.generateSuccessor(action=action)
+        print("before adding, ", self.actions, id(self.actions))
+        self.actions[action]=MCTSNode(state=new_state, edgefactory=self._edgefactory)
+        print(f"added {action} to dict", self.actions, id(self.actions))
+        self._edgefactory.CreateEdge(feature_tuple=self.state.extractFeatures(), action=action)
         return action
 
-    def rollout(self, type="random"): #Default policy is random
+    def rollout(self, type="Score"): #Default policy is random
         """Performs a random playout/heuristic score evaluation from this node and returns the payoff for player 0.
         Args: type='random' or 'Score'"""
         if type=="random":
@@ -165,49 +97,56 @@ class MCTSNode:
             return current_state.payoff()
         elif type=="Score":
             return self.state.Heuristic_Evaluate()
+        else:
+            raise ValueError(f"Invalid rollout type {type}")
 
     def backpropagate(self, reward, path):
         """Updates edges along the path taken to this node with the result of a rollout."""
-        assert path[-1].child==self
         for edge in path[::-1]:
             edge.update(reward=reward)
-            edge.parent.TotalVisits+=1
         
 
         
     def explore(self, time_limit):
         """Runs MCTS from the root node for a given tiem limit in seconds"""
         end_time = time.process_time() + time_limit
+        i=0
         while time.process_time() < end_time:
             current=self
             #Store a path to a node
             edgepath=[]
             #selection
-            while not current.is_terminal() and current.is_fully_expanded():
+            while not current.state.is_terminal() and current.is_Fully_Expanded():
+                print("selection 1")
+                print(current.state.extractFeatures(), current.state.raw_game_state.getPacmanPosition())
                 action=current.selection()
-                edgepath.append(self.edges[action])
-                current=self.edges[action].child
+                edgepath.append(self.action_to_edge(action=action))
+                print("chosen action: ", action)
+                current=MCTSNode(state=self.state.generateSuccessor(action=action), edgefactory=self._edgefactory)
             #Expansion
-            if not current.is_terminal() and not current.is_fully_expanded():
+            if not current.state.is_terminal() and not current.is_Fully_Expanded():
                 action=current.expand()
-                edgepath.append(self.edges[action])
-                current=self.edges[action].child
+                print(self.actions, action)
+                edgepath.append(self.action_to_edge(action=action))
+                current=current.actions[action]
             reward=current.rollout()
+            #print("are we stuck here")
             current.backpropagate(reward, edgepath)
-        best_action=max(current.edges.keys(), key=lambda action: current.edges[action].visits)
+            i+=1
+        best_action=self.selection()
+        #print("EdgeData", [(k, v.visits) for k, v in self._edgefactory._visited.items()])
         return best_action
+    @property
+    def TotalVisits(self):
+        total=0
+        for action in self.actions:
+            total+=self.action_to_edge(action=action).visits
+        return total
+            
+    def action_to_edge(self, action):
+        return self._edgefactory.CreateEdge(feature_tuple=self.state.extractFeatures(), action=action)
 
 
 
 
-def mcts_policy(time_limit, features):
-    """
-    Returns a function that takes a position (an instance of State) and returns the best move
-    after running MCTS for the specified time limit.
-    """
-    def policy_function(position):
-        root = MCTSNode(position, parent=None)
-        best_move = root.explore(time_limit)
-        return best_move
 
-    return policy_function

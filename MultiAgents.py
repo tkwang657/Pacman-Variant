@@ -341,7 +341,7 @@ def betterEvaluationFunction(currentGameState):
     "*** YOUR CODE HERE ***"
     # Imports
     from random import randint
-    from util import manhattanDistance as md
+    from utils import manhattanDistance as md
 
     # Useful information extracted from GameState (pacman.py)
     pacmanPos = currentGameState.getPacmanPosition()
