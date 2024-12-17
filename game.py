@@ -47,6 +47,8 @@ class Agent:
         must return an action from Directions.{North, South, East, West, Stop}
         """
         raiseNotDefined()
+    def reset(self):
+        pass
 
 class Directions:
     NORTH = 'North'
@@ -722,6 +724,8 @@ class Game:
 
         # inform a learning agent of the game result
         for agentIndex, agent in enumerate(self.agents):
+            if agentIndex==0:
+                agent.reset()
             if "final" in dir( agent ) :
                 try:
                     self.mute(agentIndex)

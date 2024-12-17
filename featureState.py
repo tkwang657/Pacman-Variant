@@ -141,7 +141,7 @@ class FeatureBasedState():
                 vector=directions[action]
                 new_pos=(self.data["cur_x"]+vector[0], self.data["cur_y"]+vector[1])
                 #print("iterating: ", (self.data["cur_x"], self.data["cur_y"]), action, new_pos, itm, self.distancer.getDistance(itm[0], pos2=new_pos))
-                if self.distancer.getDistance(itm[0], pos2=new_pos)==itm[1]-1:
+                if self.distancer.getDistance(itm[0], pos2=new_pos)<itm[1]:
                     return itm, action
                 else:
                     pass
