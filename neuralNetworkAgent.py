@@ -16,6 +16,14 @@ class NEATPacmanAgent:
         self.net = neat.nn.FeedForwardNetwork.create(genome, config)
         self.previous_positions = []
         self.oscillation_count = 0
+
+    def reset(self):
+        """
+        Resets the agent's internal state before a new game.
+        """
+        self.previous_positions = []
+        self.oscillation_count = 0
+
     
     def updateOscillationCount(self, current_position):
         """
@@ -130,7 +138,7 @@ class NEATPacmanAgent:
             local_density  # local density instead of global pellet density
         ]
 
-def run_game(agents, visualize=True):
+def run_game(agents, visualize=False):
     """
     Runs multiple games simultaneously but displays only one game at a time.
     """
@@ -149,7 +157,10 @@ def run_game(agents, visualize=True):
     ]
 
     # Create a single display for visualization
-    display = PacmanGraphics(zoom=1.0, frameTime=.1) if visualize else None
+    # display = PacmanGraphics(zoom=1.0, frameTime=.1) if visualize else None
+    import textDisplay  # Add this import
+
+    display = PacmanGraphics(zoom=1.0, frameTime=.1) if visualize else textDisplay.NullGraphics()
 
     # Initialize variables to track active game and finished games
     active_game_index = 0
@@ -212,14 +223,14 @@ def eval_genomes(genomes, config):
     agents = [NEATPacmanAgent(genome, config) for _, genome in genomes]
 
     # Run the games for all agents in the generation simultaneously
-    scores = run_game(agents, visualize=True)  # Pass the list of agents
+    scores = run_game(agents, visualize=False)  # Pass the list of agents
 
     # Assign fitness scores to each genome based on the game scores
     for (genome_id, genome), score, agent in zip(genomes, scores, agents):
         oscillation_penalty = agent.oscillation_count * 100
         genome.fitness = score - oscillation_penalty
 
-def run_winner(winner_genome, config, layout_name='smallClassic', visualize=True):
+def run_winner(winner_genome, config, layout_name='smallClassic', visualize=False):
     """
     Runs a game using the winner genome from NEAT training with DirectionalGhosts.
     """
@@ -240,7 +251,10 @@ def run_winner(winner_genome, config, layout_name='smallClassic', visualize=True
     ghost_agents = [DirectionalGhost(i + 1) for i in range(game_layout.getNumGhosts())]
 
     # Set up the display
-    display = PacmanGraphics(zoom=1.0, frameTime=0.1) if visualize else None
+    # display = PacmanGraphics(zoom=1.0, frameTime=0.1) if visualize else None
+    import textDisplay  # Add this import
+
+    display = PacmanGraphics(zoom=1.0, frameTime=0.1) if visualize else textDisplay.NullGraphics()
 
     # Create and run the game
     game = rules.newGame(game_layout, winner_agent, ghost_agents, display, quiet=not visualize)
@@ -349,7 +363,7 @@ if __name__ == "__main__":
 
             if args.best:
                 # Run the game with the loaded winner
-                final_score = run_winner(winner, config, visualize=True)
+                final_score = run_winner(winner, config, visualize=False)
                 print(f"Winner's final score: {final_score}")
 
             elif args.test:
@@ -375,7 +389,7 @@ if __name__ == "__main__":
         population.add_reporter(stats)
 
         # Run NEAT for 100 generations
-        winner = population.run(eval_genomes, n=100)
+        winner = population.run(eval_genomes, n=25)
 
         # Save the best genome
         with open("winner.pkl", "wb") as f:
@@ -384,7 +398,7 @@ if __name__ == "__main__":
         print("\nBest genome:\n", winner)
 
         # Run the game with the winner
-        final_score = run_winner(winner, config, visualize=True)
+        final_score = run_winner(winner, config, visualize=False)
         print(f"Winner's final score: {final_score}")
         # run if you want to train for a certain amount of time rather than number of generations
         # Load NEAT configuration
