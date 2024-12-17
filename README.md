@@ -37,10 +37,22 @@ For the Neural Network, the agent trained for 6 hours and ran through 2242 gener
 to the nearest food pellet, and the local pellet density in a 5 tile radius (manhattan distance). We then tested the agent for 4 hours on both Greedy and Random agents.
 Greedy Agent:
   Total Games Played: 2876636
-  Mean Score: -320.586781574033
+  Mean Score: -223.586781574033
   Variance: 1725.755372139545
 Random Agent:
   Total Games Played: 143316
-  Mean Score: -296.09742108347984
+  Mean Score: -210.09742108347984
   Variance: 10467.106219215242
+
+**Discussion**
+For the Neural Network agent, we had three features, and they were initially:
+1. The manhattan distance to the ghost
+2. The manhattan distance to the nearest food pellet
+3. The overall pellet density
+The last feature was seen as incorrect pretty quickly and replaced with the pellet density in a five tile radius. Additionally, to reduce the likelihood of loops,
+repeated actions back and forth were banned, the stop movement was banned, and a slight epsilon was added to prevent large loops over time.
+
+However, after these results were measured against the random and greedy ghost, the distance to ghost feature was then replaced with a binary deciding whether the ghost
+was within a 3 tile radius to try and prioritize the ghost distance, and the epsilon was removed. Results showed a slight improvement in the game, but ultimately wasn't
+enough to just prioritize the ghost the most.
 
