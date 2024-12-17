@@ -15,7 +15,7 @@ class MCTSAgent(Agent):
         self._edgeFactory=EdgeFactory()
         self._currentgame=0
         self._num_train=num_train
-        self._features=("Food_In_Three_Blocks", "distance_to_nearest_pellet", "Is_Ghost_Near_Me")
+        self._features=("direction_to_nearest_pellet", "Is_Ghost_Near_Me")
     
     def registerInitialState(self, gamestate): # inspects the starting state
         self._distancer=Distancer(layout=gamestate.data.layout)
@@ -26,7 +26,8 @@ class MCTSAgent(Agent):
         """Takes a GameState object"""
         rootfbs=FeatureBasedState(game_state=gamestate, features=self._features, distancer=self._distancer)
         root_tree_node=MCTSNode(state=rootfbs, edgefactory=self._edgeFactory)
-        action=root_tree_node.explore(time_limit=2)
+        action=root_tree_node.explore(time_limit=0.4)
+        print(action)
         return action
     
 

@@ -2,10 +2,6 @@ import time
 from math import sqrt, log
 import random
 from featureState import FeatureBasedState
-from pacman import GameState
-import numpy as np
-from distanceCalculator import Distancer
-import sys
 class EdgeFactory:
     def __init__(self):
         self._visited={}
@@ -51,12 +47,16 @@ class MCTSNode:
         #     return
 
         """Returns the action with the highest UCB1 value to traverse, assuming that root node is fully expanded."""
-        return max(self.state.getLegalActions(), key=lambda action: self.compute_UCB(action=action))
+        u=random.random()
+        if u<=epsilon and not self.state._Is_Ghost_Near_Me(self.state.data):
+            return self.state._nearest_food[1]
+        else:
+            return max(self.state.getLegalActions(), key=lambda action: self.compute_UCB(action=action))
 
     def is_Fully_Expanded(self):
         return len(self.actions)==len(self.state.getLegalActions())
 
-    def compute_UCB(self, action, exploration_weight=sqrt(1.5)):
+    def compute_UCB(self, action, exploration_weight=sqrt(2)):
         edge=self.action_to_edge(action=action)
         if edge.q_value== float("inf") or edge.visits==0:
             return float("inf")
@@ -77,9 +77,7 @@ class MCTSNode:
         untried_actions = [action for action in self.state.getLegalActions() if action not in self.actions.keys()]
         action = random.choice(untried_actions)
         new_state=self.state.generateSuccessor(action=action)
-        print("before adding, ", self.actions, id(self.actions))
         self.actions[action]=MCTSNode(state=new_state, edgefactory=self._edgefactory)
-        print(f"added {action} to dict", self.actions, id(self.actions))
         self._edgefactory.CreateEdge(feature_tuple=self.state.extractFeatures(), action=action)
         return action
 
@@ -117,16 +115,12 @@ class MCTSNode:
             edgepath=[]
             #selection
             while not current.state.is_terminal() and current.is_Fully_Expanded():
-                print("selection 1")
-                print(current.state.extractFeatures(), current.state.raw_game_state.getPacmanPosition())
                 action=current.selection()
                 edgepath.append(self.action_to_edge(action=action))
-                print("chosen action: ", action)
                 current=MCTSNode(state=self.state.generateSuccessor(action=action), edgefactory=self._edgefactory)
             #Expansion
             if not current.state.is_terminal() and not current.is_Fully_Expanded():
                 action=current.expand()
-                print(self.actions, action)
                 edgepath.append(self.action_to_edge(action=action))
                 current=current.actions[action]
             reward=current.rollout()
@@ -134,7 +128,12 @@ class MCTSNode:
             current.backpropagate(reward, edgepath)
             i+=1
         best_action=self.selection()
-        #print("EdgeData", [(k, v.visits) for k, v in self._edgefactory._visited.items()])
+        # print("EdgeData:")
+        # ft=self.state.extractFeatures()
+        # for k, v in self._edgefactory._visited.items():
+        #     if k[0] == ft:
+        #         print(f"{k}: {v.visits}")
+        # print(self.state._nearest_food)
         return best_action
     @property
     def TotalVisits(self):

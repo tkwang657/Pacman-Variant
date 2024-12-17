@@ -45,15 +45,14 @@ from game import Directions
 from game import Actions
 from utils import nearestPoint
 from utils import manhattanDistance
-import utils
+#import utils
 import layout
 import sys
-import types
-import time
+#import types
+import numpy as np
 import random
 import os
 
-import pacmanAgents  # This imports existing agents
 
 
 ###################################################
@@ -304,7 +303,7 @@ class ClassicGameRules:
         """
         if state.isWin():
             self.win(state, game)
-        if state.isLose():
+        if state.isLose() or state.getScore()<=-400:
             self.lose(state, game)
 
     def win(self, state, game):
@@ -556,7 +555,8 @@ def readCommand(argv):
                       help='Turns on exception handling and timeouts during games', default=False)
     parser.add_option('--timeout', dest='timeout', type='int',
                       help=default('Maximum length of time an agent can spend computing in a single game'), default=30)
-
+    parser.add_option("--maxDuration", dest='maxDuration', type='int', 
+                      help=default('Maximum duration to run games in mins'), default=False)
 
 ##    parser.add_option('-n', '--numGames', dest='numGames', type='int',
 ##                      help=default('the number of GAMES to play'), metavar='GAMES', default=1)
@@ -601,7 +601,7 @@ def readCommand(argv):
     if len(otherjunk) != 0:
         raise Exception('Command line input not understood: ' + str(otherjunk))
     args = dict()
-
+    args['maxDuration']=options.maxDuration
     # Fix the random seed
     if options.fixRandomSeed:
         random.seed('cs188')
@@ -620,7 +620,6 @@ def readCommand(argv):
         args['numTraining'] = options.numTraining
         if 'numTraining' not in agentOpts:
             agentOpts['numTraining'] = options.numTraining
-    print(agentOpts)
     pacman = pacmanType(**agentOpts)  # Instantiate Pacman with agentArgs
     args['pacman'] = pacman
 
@@ -714,14 +713,19 @@ def replayGame(layout, actions, display):
     display.finish()
 
 
-def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0, catchExceptions=False, timeout=30):
+def runGames(layout, pacman, ghosts, display, numGames, record, maxDuration, numTraining=0, catchExceptions=False, timeout=30):
     import __main__
     __main__.__dict__['_display'] = display
-
+    import time
     rules = ClassicGameRules(timeout)
     games = []
-
+    end_time=None
+    if maxDuration:
+        end_time=time.process_time()+maxDuration*60
+    print(time.process_time(), end_time)
     for i in range(numGames):
+        if end_time is not None and time.process_time()>=end_time:
+            break
         beQuiet = i < numTraining
         if beQuiet:
                 # Suppress output and graphics
@@ -751,7 +755,8 @@ def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0, c
         scores = [game.state.getScore() for game in games]
         wins = [game.state.isWin() for game in games]
         winRate = wins.count(True) / float(len(wins))
-        print('Average Score:', sum(scores) / float(len(scores)))
+        print('Average Score:', np.mean(scores))
+        print('Score std:', np.std(scores))
         print('Scores:       ', ', '.join([str(score) for score in scores]))
         print('Win Rate:      %d/%d (%.2f)' %
               (wins.count(True), len(wins), winRate))

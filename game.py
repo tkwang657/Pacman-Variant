@@ -644,8 +644,7 @@ class Game:
 
             # Solicit an action
             action = None
-            if agentIndex==1:
-                self.mute(agentIndex)
+            self.mute(agentIndex)
             if self.catchExceptions:
                 try:
                     timed_func = TimeoutFunction(agent.getAction, int(self.rules.getMoveTimeout(agentIndex)) - int(move_time))

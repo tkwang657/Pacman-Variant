@@ -1,7 +1,7 @@
 from distanceCalculator import Distancer
 from pacman import GameState
 import numpy as np
-
+import random
 # class FeatureStateFactory():
 #     def __init__(self):
 #         self._features=None
@@ -48,7 +48,17 @@ class FeatureBasedState():
         self.raw_game_state=game_state
         self.features=features
         self.distancer=distancer
-
+        #Useful Intermmediate data
+        ghost_x, ghost_y=self.raw_game_state.getGhostPosition(agentIndex=1)
+        food_grid=np.argwhere(np.array(self.raw_game_state.getFood().data, dtype=bool))
+        cur_x, cur_y=self.raw_game_state.getPacmanPosition()
+        self.data={"ghost_x": ghost_x,
+              "ghost_y": ghost_y,
+              "food_grid": food_grid, 
+              "cur_x": cur_x, 
+              "cur_y": cur_y}
+        self._nearest_food=self._distance_and_direction_to_nearest_pellet(self.data)
+        #print("INIT: ", self._nearest_food)
     def getLegalActions(self, agentIndex=0):
         return self.raw_game_state.getLegalActions(agentIndex=agentIndex)
     
@@ -79,7 +89,8 @@ class FeatureBasedState():
             else:
                 return -500
         else:
-            return self.raw_game_state.getScore()
+            #return 1/self._distance_to_nearest_pellet(self.data) + 1-len(self.data["food_grid"])/100
+            return self.raw_game_state.getScore()/100-self._distance_to_nearest_pellet(self.data)+10/len(self.data["food_grid"])+ random.randint(0,2)
         
 
     
@@ -87,24 +98,16 @@ class FeatureBasedState():
     #######
     #Calculate Features
     def extractFeatures(self):
-        ghost_x, ghost_y=self.raw_game_state.getGhostPosition(agentIndex=1)
-        food_grid=np.array(self.raw_game_state.getFood().data, dtype=bool)
-        cur_x, cur_y=self.raw_game_state.getPacmanPosition()
-        data={"ghost_x": ghost_x,
-              "ghost_y": ghost_y,
-              "food_grid": food_grid, 
-              "cur_x": cur_x, 
-              "cur_y": cur_y}
         featureTuple=[]
         for feature in self.features:
             func_ptr=self._get_feature(feature_name=feature)
-            featureTuple.append((feature, func_ptr(data=data)))
+            featureTuple.append((feature, func_ptr(data=self.data)))
         return tuple(featureTuple)
 
 
     def _Weighted_Food_Distances(self, data: dict):
         # Array of (x, y) positions where food is located
-        food_pos=np.argwhere(data["food_grid"])
+        food_pos=data["food_grid"]
         #Calculate center of food
         x_center=np.mean(food_pos[:, 0]-data["cur_x"])
         y_center=np.mean(food_pos[:,1]-data["cur_y"])
@@ -112,22 +115,44 @@ class FeatureBasedState():
         return x_center, y_center
 
     def _Food_In_Three_Blocks(self, data: dict):
-        food_pos=np.argwhere(data["food_grid"])
+        food_pos=data["food_grid"]
         for food in food_pos:
             if self.distancer.getDistance(food, pos2=(data["cur_x"], data["cur_y"])):
                 return True
             else:
                 return False
     
-    def _distance_to_nearest_pellet(self, data: dict):
-        food_pos=np.argwhere(data["food_grid"])
-        distances=[]
+    def _distance_and_direction_to_nearest_pellet(self, data: dict):
+        if self.is_terminal():
+            return None
+        food_pos=data["food_grid"]
+        foods=[]
         for food in food_pos:
-            distances.append(self.distancer.getDistance(food, pos2=(data["cur_x"], data["cur_y"])))
-        min_distance=np.min(distances)
-        return min_distance
-        
+            foods.append((food, self.distancer.getDistance(food, pos2=(data["cur_x"], data["cur_y"]))))
+        itm=min(foods, key=lambda x: x[1])
+        directions = {"North": (0, 1),
+                   "South": (0, -1),
+                   "East":  (1, 0),
+                   "West":  (-1, 0)}
+        for action in self.raw_game_state.getLegalActions():
+            if action=="Stop":
+                continue
+            else:
+                vector=directions[action]
+                new_pos=(self.data["cur_x"]+vector[0], self.data["cur_y"]+vector[1])
+                #print("iterating: ", (self.data["cur_x"], self.data["cur_y"]), action, new_pos, itm, self.distancer.getDistance(itm[0], pos2=new_pos))
+                if self.distancer.getDistance(itm[0], pos2=new_pos)==itm[1]-1:
+                    return itm, action
+                else:
+                    pass
+        assert self.is_terminal()==False, print("blab")
+        #print("testing", [a for a in self.raw_game_state.getLegalActions() if a!="Stop"])
+        return itm, random.choice([a for a in self.raw_game_state.getLegalActions() if a!="Stop"])
     
+    def _distance_to_nearest_pellet(self, data: dict):
+        return self._nearest_food[0][1]
+    def _direction_to_nearest_pellet(self, data: dict):
+        return self._nearest_food[1]
     def _Is_Ghost_Near_Me(self, data: dict):
         return self._Is_Ghost_In_One_Block(data) or self._Is_Ghost_In_Two_Blocks(data)
     
