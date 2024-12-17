@@ -755,17 +755,20 @@ def runGames(layout, pacman, ghosts, display, numGames, record, maxDuration, num
         scores = [game.state.getScore() for game in games]
         wins = [game.state.isWin() for game in games]
         winRate = wins.count(True) / float(len(wins))
-        foodEaten=[len(np.argwhere(np.array(game.state.getFood().data, dtype=bool))) for game in games]
+        foodLeft=[len(np.argwhere(np.array(game.state.getFood().data, dtype=bool))) for game in games]
         print('Average Score:', np.mean(scores))
-        print('Scores:       ', ', '.join([str(score) for score in scores]))
+        if numGames<10:
+            print('Scores:       ', ', '.join([str(score) for score in scores]))
         print('Score std:   ', np.std(scores))
-        print("FoodMean: ", np.mean(foodEaten))
-        print("FoodEaten:   ", ', '.join([str(score) for score in foodEaten]))
-        print('Food std:', np.std(foodEaten))
+        print("FoodLeft Mean: ", np.mean(foodLeft))
+        if numGames<10:
+            print("FoodLeft:   ", ', '.join([str(score) for score in foodLeft]))
+        print('FoodLeft std:', np.std(foodLeft))
         print('Win Rate:      %d/%d (%.2f)' %
               (wins.count(True), len(wins), winRate))
-        print('Record:       ', ', '.join(
-            [['Loss', 'Win'][int(w)] for w in wins]))
+        if numGames<10:
+            print('Record:       ', ', '.join(
+                [['Loss', 'Win'][int(w)] for w in wins]))
 
     return games
 
