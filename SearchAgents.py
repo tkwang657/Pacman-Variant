@@ -73,7 +73,7 @@ class MCTSAgent(Agent):
         self._distancer=None
         self._edgeFactory=EdgeFactory()
         self._features=("direction_to_nearest_pellet", "Is_Ghost_Near_Me")
-        self._timelimit=timelimit
+        self._timelimit=float(timelimit)
     
     def registerInitialState(self, gamestate): # inspects the starting state
         self._distancer=Distancer(layout=gamestate.data.layout)
