@@ -6,10 +6,12 @@ For example:
 `python3 pacman.py --layout smallClassic`
 
 **Description of Game**
-Welcome to Pacman! The goal of the game is to have the yellow Pac-man eat all of the pellets before any of the ghosts touch you! For simplicity, we have removed
-fruit, all but one ghost, and created a smaller custom board to run the game on.
+Welcome to Pacman! The goal of the game is to have the yellow Pac-man eat all of the pellets before any of the ghosts touch you! For simplicity, we have removed all pellts and fruits, cut down the # of ghosts to 1, and created a custom board to run the game on.
+
+Research Question: "How do features contribute more effectively: as state encoders for search efficiency, or as inputs to heuristics for state valuation?"
 
 **MCTS Agent** (Alex Kwang)
+
 To test the MCTS Agent, run:
 python3 pacman.py --layout <nameofmap> -p MCTSAgent -g <GhostType> --quietTextGraphics --numGames <numGames> --maxDuration <maxDuration> -a timelimit=timelimit
 1. layout: bigClassic, mediumClassic, smallClassic, smallClassicLittleFood
@@ -20,6 +22,10 @@ python3 pacman.py --layout <nameofmap> -p MCTSAgent -g <GhostType> --quietTextGr
 Example: 
 python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20 --maxDuration 5 -a timelimit=0.05
 will run the game for either 6 minutes or 20 games and output stats whichever is hit first, where our MCTS agent has 0.05 seconds per move.
+
+Results Analysis
+
+
 
 **Neural Network Agent** (Thomas Chung)\
 To train the Neural Network, run:\
