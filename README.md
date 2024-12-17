@@ -5,7 +5,8 @@ python3 pacman.py --layout <nameofmap>
 FOr example:
 python3 pacman.py --layout smallClassic
 
-To test the MCTS Agent, run: 
+**MCTS Agent** (Alex Kwang)
+To test the MCTS Agent, run:
 python3 pacman.py --layout <nameofmap> -p MCTSAgent -g <GhostType> --quietTextGraphics --numGames <numGames> --maxDuration <maxDuration> -a timelimit=timelimit
 1. layout: bigClassic, mediumClassic, smallClassic, smallClassicLittleFood
 2. GhostType: RandomGhost or DirectionalGhost (Note the DirectionalGhost is a greedyghost that chases Pacman)
@@ -16,10 +17,10 @@ Example:
 python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20 --maxDuration 5 -a timelimit=0.05
 will run the game for either 6 minutes or 20 games and output stats whichever is hit first, where our MCTS agent has 0.05 seconds per move.
 
-# Neural Network Agent
+**Neural Network Agent** (Thomas Chung)
 To train the Neural Network, run:
 `python3 neuralNetworkAgent.py`
-This will train the NN for whatever number of generations specified by the code (right now n=100), but if you switch the else statement of the \__\main__ function
+This will train the NN for whatever number of generations specified by the code (right now n=100), but if you switch the else statement of the __main__ function
 with what is commented out, it will run for a certain amount of time (default = 4 hours).
 
 To run the best Neural Network you have saved (a default is already loaded in in winner.pkl), run
