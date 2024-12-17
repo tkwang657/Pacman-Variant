@@ -550,7 +550,7 @@ def readCommand(argv):
     parser.add_option('-x', '--numTraining', dest='numTraining', type='int',
                       help=default('How many episodes are training (suppresses output)'), default=0)
     parser.add_option('--frameTime', dest='frameTime', type='float',
-                      help=default('Time to delay between frames; <0 means keyboard'), default=0.1)
+                      help=default('Time to delay between frames; <0 means keyboard'), default=0.05)
     parser.add_option('-c', '--catchExceptions', action='store_true', dest='catchExceptions',
                       help='Turns on exception handling and timeouts during games', default=False)
     parser.add_option('--timeout', dest='timeout', type='int',
@@ -755,9 +755,13 @@ def runGames(layout, pacman, ghosts, display, numGames, record, maxDuration, num
         scores = [game.state.getScore() for game in games]
         wins = [game.state.isWin() for game in games]
         winRate = wins.count(True) / float(len(wins))
+        foodEaten=[len(np.argwhere(np.array(game.state.getFood().data, dtype=bool))) for game in games]
         print('Average Score:', np.mean(scores))
-        print('Score std:', np.std(scores))
         print('Scores:       ', ', '.join([str(score) for score in scores]))
+        print('Score std:   ', np.std(scores))
+        print("FoodMean: ", np.mean(foodEaten))
+        print("FoodEaten:   ", ', '.join([str(score) for score in foodEaten]))
+        print('Food std:', np.std(foodEaten))
         print('Win Rate:      %d/%d (%.2f)' %
               (wins.count(True), len(wins), winRate))
         print('Record:       ', ', '.join(
