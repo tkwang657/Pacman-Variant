@@ -26,10 +26,10 @@ To train the Neural Network, run:
 `python3 neuralNetworkAgent.py`
 This will train the NN for whatever number of generations specified by the code (right now n=100), but if you switch the else statement of the __main__ function (in neuralNetworkAgent.py) with what is commented out, it will run for a certain amount of time (default = 4 hours).
 
-To run the best Neural Network you have saved (a default is already loaded in in winner.pkl) once, run
+To run the best Neural Network you have saved (a default is already loaded in in winner.pkl) once, run\
 `python3 neuralNetworkAgent.py -best`
 
-To test the Neural Network agent and return the mean & variance over a disclosed amount of time (right now 30 seconds), run
+To test the Neural Network agent and return the mean & variance over a disclosed amount of time (right now 30 seconds), run\
 `python3 neuralNetworkAgent.py -test` --> results will print out in 30 seconds
 
 **Results**\
