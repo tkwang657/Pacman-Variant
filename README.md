@@ -20,8 +20,8 @@ python3 pacman.py --layout <nameofmap> -p MCTSAgent -g <GhostType> --quietTextGr
 5. If both maxDuration and numgames are passed in, the code will terminate whichever limit is hit first. maxDuration is amount of time in minutes.
 5. -a passes in a time limit in seconds for the MCTS Agent for each action. The default is 0.05 seconds
 Example to run for 6 mins: 
-python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20 --maxDuration 5 -a timelimit=0.08
-will run the game for either 5 minutes or 20 games and output stats whichever is hit first, where our MCTS agent has 0.08 seconds per move.
+python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 20 --maxDuration 5 -a timelimit=0.1
+will run the game for either 5 minutes or 20 games and output stats whichever is hit first, where our MCTS agent has 0.1 seconds per move.
 
 Algorithmic Overview:
     Game state is encoded with 2 features: is_ghost_near_me and direction_to_nearest_pellet. This gives 8 possible game states. The statistics are stored along the edges, so effectively there are 40 possible (state, action) pairs.
@@ -30,14 +30,14 @@ Algorithmic Overview:
     "self.raw_game_state.getScore()/100-self._distance_to_nearest_pellet(self.data)+10/len(self.data["food_grid"])+ random.randint(0,2)"
 
 Selection of time_limit:
-There was insufficient time to run a thorough testing of time_limit given to the MCTS call, but experimentation revealed that more time does not necessarily lead to better performance. After choosing values within the range of (0.01 - 5) seconds, a final time_limit of 0.05 was chosen.
+There was insufficient time to run a thorough testing of time_limit given to the MCTS call, but experimentation revealed that more time does not necessarily lead to better performance. After choosing values within the range of (0.01 - 5) seconds, a final time_limit of 0.1 was chosen.
 
 Results Analysis:
 We would like to highly stress that the performance of the MCTSAgent is most clearly seen in a visual setting, where we can physically see the moves that the Agent takes to avoid the Ghost. Statistics have are unable to capture how close an agent makes it to the end of the level, so I have gathered some data, namely the foodLeft to show the progression through the level. Through visual analysis over ~100 games, we observed that many instances of the MCTS agent losing was because they ended up in a dead end within the Ghost Spawn.
 
-Games were tested on the mediumClassic Map, smallClassic Map using numGames=10000 games and maxDuration=240 minutes for both maps. Agents were given a 0.05 seconds timelimit. So to replicate results, you should run the following two commands:
-    python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 10000 --maxDuration 240 -a timelimit=0.05
-    python3 pacman.py --layout mediumClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 10000 --maxDuration 240 -a timelimit=0.05
+Games were tested on the mediumClassic Map, smallClassic Map using numGames=10000 games and maxDuration=240 minutes for both maps. Agents were given a 0.1 seconds timelimit. So to replicate results, you should run the following two commands:
+    python3 pacman.py --layout smallClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 10000 --maxDuration 240 -a timelimit=0.1
+    python3 pacman.py --layout mediumClassic -p MCTSAgent -g DirectionalGhost --quietTextGraphics --numGames 10000 --maxDuration 240 -a timelimit=0.1
 Small Classic:
 Average Score: -28.722266560255385
 Score std:    310.0363321942598
@@ -50,9 +50,9 @@ Average Score: 839.7
 Score std:    499.3724161384968
 FoodLeft Mean:  6.05
 FoodLeft std: 10.892543321006348
-Win Rate:      1516/2167 (0.70)
+Win Rate:      1451/2167 (0.67)
 
-The agent also seems to do perform significantly better on the MediumClassic map compared to the smallClassic Map. Perhaps this is because the larger state space of MediumClassic map allows for a more generalisability of the game state via our features whereas the small map might be too specific.
+The agent seems to perform significantly better on the MediumClassic map compared to the smallClassic Map. Perhaps this is because the larger state space of MediumClassic map allows for a more generalisability of the game state via the chosen features whereas the small map might be too specific.
 
 Understandably, much less games were played for the mediumClassic compared to the SmallClassic, this makes sense because the mediumClassic map is larger and each playthrough takes more time. There is a high variance in the score compared to the foodLeft metric. This score is calculated by penalizing -500 for collision with ghost, +10 for each food pellet eaten, -1 for second that passes by, +500 for victory. Although it correctly encapsulates the idea that an agent that takes longer to win is worse than one that takes less time to win, it fails to give a notion of performance if the agent loses. Since our agents have a low winning rate, it was more beneficial to gather data on foodLeft, which captures the idea of how far away Pacman is from victory.
 
